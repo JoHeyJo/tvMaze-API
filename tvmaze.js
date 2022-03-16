@@ -4,6 +4,9 @@ const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
 
+const DEFAULT_IMG = "https://tinyurl.com/tv-missing";
+const API_BASE_URL = "http://api.tvmaze.com";
+
 /** Given a search term, search for tv shows that match that query.
  *
  *  Returns (promise) array of show objects: [show, show, ...].
@@ -12,19 +15,24 @@ const $searchForm = $("#searchForm");
  */
 
 async function getShowsByTerm(show) {
-  let response = await axios.get("http://api.tvmaze.com/search/shows", {
+  let response = await axios.get(`${API_BASE_URL}/search/shows`, {
     params: { q: show },
   });
 
   return response.data.map((showData) => {
     let showImg = showData.show.image;
-    if (showImg === null) {
-      // default image if null
-      showImg = "https://tinyurl.com/tv-missing";
-    } else {
-      // if the object exists, choose the original sized image
-      showImg = showData.show.image.original;
-    }
+    showImg === null
+      ? (showImg = DEFAULT_IMG)
+      : (showImg = showData.show.image.original);
+
+    // Shortened this code with ternary operator on line 22
+    // if (showImg === null) {
+    //   // default image if null
+    //   showImg = DEFAULT_IMG;
+    // } else {
+    //   // if the object exists, choose the original sized image
+    //   showImg = showData.show.image.original;
+    // }
 
     // returning object with specified key/value pairs
     return {
