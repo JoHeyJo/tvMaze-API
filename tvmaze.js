@@ -4,7 +4,6 @@ const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
 
-
 /** Given a search term, search for tv shows that match that query.
  *
  *  Returns (promise) array of show objects: [show, show, ...].
@@ -13,18 +12,29 @@ const $searchForm = $("#searchForm");
  */
 
 async function getShowsByTerm(show) {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
-  let response = await axios.get(
-    "http://api.tvmaze.com/search/shows", { params: { q:show}}
-  );
-
-  return response.data.map((showData) => {
-    const showImg = showData.image || "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fcliparts.co%2Fcliparts%2FqTB%2FX8p%2FqTBX8p46c.jpg&f=1&nofb=1";
-  return  [showData.show.id, showData.show.name, showData.show.summary, showImg];
+  let response = await axios.get("http://api.tvmaze.com/search/shows", {
+    params: { q: show },
   });
 
-}
+  return response.data.map((showData) => {
+    let showImg = showData.show.image;
+    if (showImg === null) {
+      // default image if null
+      showImg = "https://tinyurl.com/tv-missing";
+    } else {
+      // if the object exists, choose the original sized image
+      showImg = showData.show.image.original;
+    }
 
+    // returning object with specified key/value pairs
+    return {
+      id: showData.show.id,
+      name: showData.show.name,
+      summary: showData.show.summary,
+      image: showImg,
+    };
+  });
+}
 
 /** Given list of shows, create markup for each and to DOM */
 
@@ -33,11 +43,11 @@ function populateShows(shows) {
 
   for (let show of shows) {
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+      `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
-           <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+           <img
+              src=${show.image}
+              alt="TV show picture"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -46,13 +56,14 @@ function populateShows(shows) {
                Episodes
              </button>
            </div>
-         </div>  
+         </div>
        </div>
-      `);
+      `
+    );
 
-    $showsList.append($show);  }
+    $showsList.append($show);
+  }
 }
-
 
 /** Handle search form submission: get shows from API and display.
  *    Hide episodes area (that only gets shown if they ask for episodes)
@@ -71,12 +82,11 @@ $searchForm.on("submit", async function (evt) {
   await searchForShowAndDisplay();
 });
 
-
 /** Given a show ID, get from API and return (promise) array of episodes:
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {}
 
 /** Write a clear docstring for this function... */
 
