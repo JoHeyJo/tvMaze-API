@@ -69,7 +69,6 @@ function populateShows(shows) {
        </div>
       `
     );
-
     $showsList.append($show);
   }
 }
@@ -91,6 +90,16 @@ $searchForm.on("submit", async function (evt) {
   await searchForShowAndDisplay();
 });
 
+$showsList.on("click", ".Show-getEpisodes", async function (evt) {
+  // console.log("we are here");
+  // console.log(evt.target);
+  let closest = $(evt.target).closest(".Show"); // look for closest element with this class
+  // console.log("closest", closest);
+  let episodes = await getEpisodesOfShow(closest.data("show-id"));
+  // console.log(episodes);
+  populateEpisodes(episodes);
+});
+
 /** Given a show ID, get from API and return (promise) array of episodes:
  *      { id, name, season, number }
  */
@@ -98,36 +107,29 @@ $searchForm.on("submit", async function (evt) {
 async function getEpisodesOfShow(id) {
   let tvEpisodes = await axios.get(`${API_BASE_URL}/shows/${id}/episodes`);
 
-  
   return tvEpisodes.data.map((showData) => {
-    return  { 
-      id: showData.id, 
+    return {
+      id: showData.id,
       name: showData.name,
       season: showData.season,
-      number: showData.number
+      number: showData.number,
     };
   });
 }
 
-/** Write a clear docstring for this function... */
+/** Given a list of episodes, create an li element for each and append to the DOM */
 
-function populateEpisodes(episodes) { 
+function populateEpisodes(episodes) {
   $episodesList.empty();
 
-  for(let episode of episodes){
+  for (let episode of episodes) {
     const $episode = $(`
-      <li> ${episode.name} (season: ${episode.season}, number: ${episode.number})"</li>
+      <li> ${episode.name} (season: ${episode.season}, number: ${episode.number})</li>
     `);
     $episodesList.append($episode);
   }
-
+  $episodesArea.show();
 }
-
-
-
-
-
-
 
 //shows
 //http://api.tvmaze.com/search/shows?q=[searchquery]
